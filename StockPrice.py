@@ -1,11 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mltools as ml
+#import mltools as ml
 from pandas_datareader import data as pdr
 from datetime import date, datetime, timedelta
-#import yfinance as yf
-import fix_yahoo_finance as yf
+import yfinance as yf
+#import fix_yahoo_finance as yf
 import pandas as pd
+
+import sys
 
 numRequests = 0
 
@@ -19,11 +21,13 @@ def getFinanceData(fileName):#financial documents, not stock price
 def byDate(df):
     prevDate = df[3].values[0]
     output = []
-    sameDateTickers = [] 
+    sameDateTickers = []
+    
     for currDate, ticker in zip(df[3].values, df[4].values):
         if(currDate == prevDate):
             sameDateTickers.append(ticker)
         else:
+            
             #print(sameDateTickers)
             output += getData(sameDateTickers, prevDate)
             #print("\n\n" + str(prevDate) + "\n\n")
@@ -44,7 +48,7 @@ def nextDay(inpDate):
 def getData(ticker, date):
     global numRequests
     numRequests += 1
-    if(numRequests % 50 == 0):
+    if(numRequests % 10 == 0):
         print("\n\n\nNumber of Requests: {},\nDate: {}\n\n".format(numRequests, date))
     #print(ticker)
     #data = pdr.get_data_yahoo("AAPL", start=date, end=date)
@@ -62,10 +66,11 @@ def getData(ticker, date):
     return closeVal
 
 if __name__ == '__main__':
-    fileName = "2008to2020.tsv" #"last.tsv"
+    print(sys.argv[1])
+    fileName = sys.argv[1] + '.tsv' #"last.tsv"
     df = getFinanceData(fileName)
     out = byDate(df)
     df['price'] = out
     df.dropna(inplace=True)
-    saveDF(df, 'ALL_data.tsv')
+    saveDF(df, sys.argv[1] + '_out.tsv')
     print("Num Requests at End: ", numRequests)
