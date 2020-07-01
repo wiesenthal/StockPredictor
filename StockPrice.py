@@ -33,11 +33,13 @@ def byDate(df):
             #print("\n\n" + str(prevDate) + "\n\n")
             prevDate = currDate
             sameDateTickers = [ticker]
-    output += getData(sameDateTickers, prevDate)
+    data_dict = getData(sameDateTickers, prevDate)
+    for t in sameDateTickers:
+        output.append(data_dict[t])
     return output
         
 def saveDF(df, filename):
-    df.to_csv('./data/'+filename, sep="\t")
+    df.to_csv(filename, sep="\t")
 
 def dateToString(date):
     return pd.to_datetime(str(date)).strftime("%Y-%m-%d")
@@ -55,15 +57,26 @@ def getData(ticker, date):
     #print("Start Date: {}\tNext Day: {}".format(dateToString(date), dateToString(nextDay(date))))
     
     data = yf.download(ticker, start=dateToString(date), end=dateToString(nextDay(date)), threads=False) #,threads=True
-
+    d = {}
     if(data.empty):
-        return [np.nan]*len(ticker) 
-    closeVal = data['Adj Close'].values.tolist()
-    if type(closeVal[0]) is list:
-        closeVal = closeVal[0]
+        for i in ticker:
+            d[i] = np.nan
+        return d
+        #return [np.nan]*len(ticker)
+    
+    for i in data['Adj Close'].keys():
+        try:
+            d[i] = data['Adj Close'][i].values[0]
+        except:
+            d[i] = data['Adj Close'][0]
+            
+    #closeVal = data['Adj Close'].values.tolist()
+    
+    #while type(closeVal[0]) is list:
+    #    closeVal = closeVal[0]
     #openVal = data['Open'].values[0]
     #data_name=ticker + '_' + end_date
-    return closeVal
+    return d
 
 if __name__ == '__main__':
     print(sys.argv[1])
