@@ -29,7 +29,9 @@ def byDate(df):
         else:
             
             #print(sameDateTickers)
-            output += getData(sameDateTickers, prevDate)
+            data_dict = getData(sameDateTickers, prevDate)
+            for t in sameDateTickers:
+                output.append(data_dict[t])
             #print("\n\n" + str(prevDate) + "\n\n")
             prevDate = currDate
             sameDateTickers = [ticker]
@@ -63,12 +65,13 @@ def getData(ticker, date):
             d[i] = np.nan
         return d
         #return [np.nan]*len(ticker)
-    
-    for i in data['Adj Close'].keys():
-        try:
+
+    if len(ticker) == 1:
+        print(ticker[0], data['Adj Close'][0])
+        d[ticker[0]] = data['Adj Close'][0]
+    else:
+        for i in data['Adj Close'].keys():
             d[i] = data['Adj Close'][i].values[0]
-        except:
-            d[i] = data['Adj Close'][0]
             
     #closeVal = data['Adj Close'].values.tolist()
     
@@ -82,6 +85,7 @@ if __name__ == '__main__':
     print(sys.argv[1])
     fileName = sys.argv[1] + '.tsv' #"last.tsv"
     df = getFinanceData(fileName)
+    print("byDate")
     out = byDate(df)
     df['price'] = out
     df.dropna(inplace=True)
